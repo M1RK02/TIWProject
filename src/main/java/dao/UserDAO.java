@@ -4,8 +4,11 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 import beans.User;
+import it.polimi.tiw.messages.beans.Message;
 
 public class UserDAO {
 	private Connection connection;
@@ -47,4 +50,50 @@ public class UserDAO {
 			pstatement.executeUpdate();
 		}
 	}
+	
+	public List<User> findEntrantsByGroupId(int groupId) throws SQLException {
+		List<User> users = new ArrayList<User>();
+		String query = "SELECT UserId FROM Entrant WHERE GroupId = ?";
+		try (PreparedStatement pstatement = connection.prepareStatement(query)) {
+			pstatement.setInt(1, groupId);
+			try (ResultSet result = pstatement.executeQuery()) {
+				while (result.next()) {
+					int userId= result.getInt("UserId");
+					User user= findUserById(userId);
+					users.add(user);
+				}
+			}
+		}
+		return users;
+	
+	}
+	
+	private User findUserById(int userId) throws SQLException {
+		String query = "SELECT Id, Username, Email, Name, Surname FROM User WHERE Id = ?";
+		try (PreparedStatement pstatement = connection.prepareStatement(query);) {
+			pstatement.setInt(1, userId);
+			try (ResultSet result = pstatement.executeQuery();) {
+				result.next();
+				User user = new User();
+				user.setId(result.getInt("Id"));
+				user.setUsername(result.getString("Username"));
+				user.setEmail(result.getString("Email"));
+				user.setName(result.getString("Name"));
+				user.setSurname(result.getString("Surname"));
+				return user;
+			}
+		}	
+	}
+	public boolean isUsernameUnique(String username) throws SQLException {
+		String query= "SELECT Username FROM User WHERE Username = ? ";
+		try (PreparedStatement pstatement = connection.prepareStatement(query)) {
+			pstatement.setString(1, username);
+			try (ResultSet result = pstatement.executeQuery()) {
+				if (!result.isBeforeFirst()) // no results, credential check failed
+					return true;
+				return false;
+			} 
+		}
+	}
 }
+
