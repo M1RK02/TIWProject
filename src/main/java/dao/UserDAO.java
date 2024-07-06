@@ -1,11 +1,7 @@
 package dao;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
+import java.sql.*;
+import java.util.*;
 
 import beans.User;
 
@@ -38,8 +34,7 @@ public class UserDAO {
 		}
 	}
 
-	public void addUser(String username, String password, String email, String name, String surname)
-			throws SQLException {
+	public void addUser(String username, String password, String email, String name, String surname) throws SQLException {
 		String query = "INSERT INTO User (Username, Password, Email, Name, Surname) VALUES (?, ?, ?, ?, ?)";
 		try (PreparedStatement pstatement = connection.prepareStatement(query)) {
 			pstatement.setString(1, username);
@@ -86,11 +81,11 @@ public class UserDAO {
 	}
 
 	public boolean isUsernameUnique(String username) throws SQLException {
-		String query = "SELECT Username FROM User WHERE Username = ? ";
+		String query = "SELECT Username FROM User WHERE Username = ?";
 		try (PreparedStatement pstatement = connection.prepareStatement(query)) {
 			pstatement.setString(1, username);
 			try (ResultSet result = pstatement.executeQuery()) {
-				if (!result.isBeforeFirst()) // no results, credential check failed
+				if (!result.isBeforeFirst())
 					return true;
 				return false;
 			}

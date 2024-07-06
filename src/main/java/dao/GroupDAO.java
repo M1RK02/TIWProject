@@ -1,15 +1,10 @@
 package dao;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.sql.*;
+import java.util.*;
 
 import beans.Group;
+import beans.User;
 
 public class GroupDAO {
 	private Connection connection;
@@ -39,62 +34,39 @@ public class GroupDAO {
 		}
 		return groups;
 	}
-	//l'ho fatto un po' diverso, seguendo "TOPICdao" dell'esempio della bacheca messaggi
-	public Group findGroupById(int GroupId) throws SQLException {
-		Group group= null;
-		String query= "SELECT * FROM Group WHERE id= ?";
-		ResultSet result = null;
-		PreparedStatement pstatement = null;
-		try {
-			pstatement = connection.prepareStatement(query);
-			pstatement.setInt(1, GroupId);
-			result= pstatement.executeQuery(); 
-				while (result.next()) {
-					group = new Group();
-					group.setId(result.getInt("id"));
-					group.setCreatorId(result.getInt("creatorId"));
-					group.setTitle(result.getString("title"));
-					group.setCreationDate(result.getDate("creationDate"));
-					group.setDuration(result.getInt("duration"));
-					group.setMinEntrants(result.getInt("minEntrants"));
-					group.setMaxEntrants(result.getInt("maxEntrants"));
-				}
-			}catch (SQLException e) {
-				throw new SQLException(e);
-	
-			}finally {
-				try {
-					if (result != null) {
-						result.close();
-					}
-				} catch (Exception e1) {
-					throw new SQLException("Cannot close result");
-				}
-				try {
-					if (pstatement != null) {
-						pstatement.close();
-					}
-				} catch (Exception e1) {
-					throw new SQLException("Cannot close statement");
-				}
-		}
-		
-		return group;
-	}
-	
-	
-	public void addGroup(int id, int creatorId,String title, Date creationDate,int duration, int minEntrants, int maxEntrants) throws SQLException {
-		String query = "INSERT INTO Group (id, creatorId, title, creationDate, duration, minEntrants, maxEntrants) VALUES (?, ?, ?, ?, ?, ?, ?)";
+
+	public Group findGroupById(int groupId) throws SQLException {
+		String query= "SELECT * FROM Group WHERE Id = ?";
 		try (PreparedStatement pstatement = connection.prepareStatement(query)) {
-			pstatement.setInt(1, id);
-			pstatement.setInt(2, creatorId);
-			pstatement.setString(3, title);
-			pstatement.setInt(4, duration);
-			pstatement.setObject(5, creationDate.toInstant().atZone(ZoneId.of("Europe/Rome")).toLocalDate());
-			pstatement.setInt(6, minEntrants);
-			pstatement.setInt(7, maxEntrants);
+			pstatement.setInt(1, groupId);
+			try (ResultSet result = pstatement.executeQuery()) {
+				if (!result.isBeforeFirst())
+					return null;
+				else {
+					result.next();
+					Group group = new Group();
+					group.setId(result.getInt("Id"));
+					group.setCreatorId(result.getInt("CreatorId"));
+					group.setTitle(result.getString("Title"));
+					group.setCreationDate(result.getDate("CreationDate"));
+					group.setDuration(result.getInt("Duration"));
+					group.setMinEntrants(result.getInt("MinEntrants"));
+					group.setMaxEntrants(result.getInt("MaxEntrants"));
+					return group;
+				}
+			}
+		}
+	}
+
+	public void addGroup(int creatorId, String title, int duration, int minEntrants, int maxEntrants, List<User> entrants) throws SQLException {
+		String query = "INSERT INTO Group (CreatorId, Title, Duration, MinEntrants, MaxEntrants) VALUES (?, ?, ?, ?, ?)";
+		try (PreparedStatement pstatement = connection.prepareStatement(query)) {
+			pstatement.setInt(1, creatorId);
+			pstatement.setString(2, title);
+			pstatement.setInt(3, duration);
+			pstatement.setInt(4, minEntrants);
+			pstatement.setInt(5, maxEntrants);
 			pstatement.executeUpdate();
 		}
 	}
-	
 }

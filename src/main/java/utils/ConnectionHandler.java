@@ -1,11 +1,7 @@
 package utils;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-
-import javax.servlet.ServletContext;
-import javax.servlet.UnavailableException;
+import java.sql.*;
+import javax.servlet.*;
 
 public class ConnectionHandler {
 	public static Connection getConnection(ServletContext context) throws UnavailableException {
