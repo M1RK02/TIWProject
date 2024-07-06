@@ -60,10 +60,9 @@ public class UserDAO {
 			}
 		}
 		return users;
-
 	}
 
-	private User findUserById(int userId) throws SQLException {
+	public User findUserById(int userId) throws SQLException {
 		String query = "SELECT Id, Username, Email, Name, Surname FROM User WHERE Id = ?";
 		try (PreparedStatement pstatement = connection.prepareStatement(query)) {
 			pstatement.setInt(1, userId);

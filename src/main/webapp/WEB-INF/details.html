@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+	<meta charset="ISO-8859-1">
+	<title>Group Details</title>
+</head>
+
+<body>
+	<div align="right">
+		<a th:href="@{/Home}">Back</a>
+	</div>
+	
+	<h1 th:text="${group.title}">Title</h1>
+	<h3>Creator: <span th:text="${creator.name} + ' ' + ${creator.surname}"></span></h3>
+	<h3>Creation date: <span th:utext="${group.creationDate}"></span></h3>
+	<h3>Duration: <span th:utext="${group.duration}"></span></h3>
+	<h3>Minimum entrants: <span th:utext="${group.minEntrants}"></span></h3>
+	<h3>Maximum entrants: <span th:utext="${group.maxEntrants}"></span></h3>
+	
+	<h2>Entrants:</h2>
+	<ul th:remove="all-but-first">
+	  <li th:each="user : ${entrants}" th:text="${user.name} + ' ' + ${user.surname}">Coffe</li>
+	  <li>Tea</li>
+	  <li>Milk</li>
+	</ul>
+</body>
+
+</html>
