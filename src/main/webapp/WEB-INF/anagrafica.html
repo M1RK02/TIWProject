@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+	<meta charset="ISO-8859-1">
+	<title>Anagrafica</title>
+</head>
+
+<body>
+	<div align="right">
+		<a th:href="@{/Home}">Cancel</a>
+	</div>
+	
+	<h1>Who's Invited?</h1>
+	<form action="#" th:action="@{/CheckInvited}" method="POST">
+		<table th:remove="all-but-first">
+		  <tr th:each="user : ${users}">
+		    <td><input type="checkbox" name="checkedUserIds" value="${user.id}"></td>
+		    <td th:text="${user.name} + ' ' + ${user.surname}">Maria Anders</td>
+		  </tr>
+		  <tr>
+		    <td><input type="checkbox"></td>
+		    <td>Francisco Chang</td>
+		  </tr>
+		</table>
+		<br>
+		<input type="submit" value="Invite">
+	</form>
+</body>
+
+</html>

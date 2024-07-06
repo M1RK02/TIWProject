@@ -93,7 +93,7 @@ public class UserDAO {
 
 	public List<User> findAllUsersOrderedBySurname() throws SQLException {
 		List<User> users = new ArrayList<User>();
-		String query = "SELECT Id, Username, Email, Name, Surname FROM User ORDERED BY Surname";
+		String query = "SELECT Id, Username, Email, Name, Surname FROM User ORDER BY Surname";
 		try (PreparedStatement pstatement = connection.prepareStatement(query)) {
 			try (ResultSet result = pstatement.executeQuery()) {
 				while (result.next()) {
