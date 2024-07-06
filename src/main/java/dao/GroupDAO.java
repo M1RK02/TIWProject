@@ -15,7 +15,7 @@ public class GroupDAO {
 
 	public List<Group> findActiveGroupsByCreatorId(int creatorId) throws SQLException {
 		List<Group> groups = new ArrayList<Group>();
-		String query = "SELECT * FROM Group WHERE CreatorId = ? AND DATE_ADD(CreationDate, INTERVAL Duration DAY) < NOW()";
+		String query = "SELECT * FROM `Group` WHERE CreatorId = ? AND DATE_ADD(CreationDate, INTERVAL Duration DAY) >= CURDATE()";
 		try (PreparedStatement pstatement = connection.prepareStatement(query);) {
 			pstatement.setInt(1, creatorId);
 			try (ResultSet result = pstatement.executeQuery();) {
@@ -36,7 +36,7 @@ public class GroupDAO {
 	}
 
 	public Group findGroupById(int groupId) throws SQLException {
-		String query= "SELECT * FROM Group WHERE Id = ?";
+		String query= "SELECT * FROM `Group` WHERE Id = ?";
 		try (PreparedStatement pstatement = connection.prepareStatement(query)) {
 			pstatement.setInt(1, groupId);
 			try (ResultSet result = pstatement.executeQuery()) {
@@ -59,7 +59,7 @@ public class GroupDAO {
 	}
 
 	public void addGroup(int creatorId, String title, int duration, int minEntrants, int maxEntrants, List<User> entrants) throws SQLException {
-		String query = "INSERT INTO Group (CreatorId, Title, Duration, MinEntrants, MaxEntrants) VALUES (?, ?, ?, ?, ?)";
+		String query = "INSERT INTO `Group` (CreatorId, Title, Duration, MinEntrants, MaxEntrants) VALUES (?, ?, ?, ?, ?)";
 		try (PreparedStatement pstatement = connection.prepareStatement(query)) {
 			pstatement.setInt(1, creatorId);
 			pstatement.setString(2, title);

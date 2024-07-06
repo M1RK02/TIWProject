@@ -32,49 +32,41 @@ public class CheckLogin extends HttpServlet {
 	}
 
 	public void init() throws ServletException {
-		connection = ConnectionHandler.getConnection(getServletContext());
 		ServletContext servletContext = getServletContext();
 		ServletContextTemplateResolver templateResolver = new ServletContextTemplateResolver(servletContext);
 		templateResolver.setTemplateMode(TemplateMode.HTML);
 		this.templateEngine = new TemplateEngine();
 		this.templateEngine.setTemplateResolver(templateResolver);
 		templateResolver.setSuffix(".html");
+		connection = ConnectionHandler.getConnection(getServletContext());
 	}
 
-	protected void doPost(HttpServletRequest request, HttpServletResponse response)
-			throws ServletException, IOException {
-		
-		// obtain and escape params
-		String usrn = null;
-		String pwd = null;
-		
+	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		// Obtain and clean parameters inserted by the user
+		String username = null;
+		String password = null;
 		try {
-			usrn = StringEscapeUtils.escapeJava(request.getParameter("username"));
-			pwd = StringEscapeUtils.escapeJava(request.getParameter("pwd"));
-			
-			if (usrn == null || pwd == null || usrn.isEmpty() || pwd.isEmpty()) {
+			username = StringEscapeUtils.escapeJava(request.getParameter("username"));
+			password = StringEscapeUtils.escapeJava(request.getParameter("password"));
+			if (username == null || password == null || username.isEmpty() || password.isEmpty()) {
 				throw new Exception("Missing or empty credential value");
 			}
-
 		} catch (Exception e) {
-			// for debugging only e.printStackTrace();
 			response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Missing credential value");
 			return;
 		}
 
-		// query db to authenticate for user
+		// Check in the database for the user
 		UserDAO userDao = new UserDAO(connection);
 		User user = null;
 		try {
-			user = userDao.checkCredentials(usrn, pwd);
+			user = userDao.checkCredentials(username, password);
 		} catch (SQLException e) {
 			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Not Possible to check credentials");
 			return;
 		}
 
-		// If the user exists, add info to the session and go to home page, otherwise
-		// show login page with error message
-
+		// If we find the user, add data to the session and go to home page, otherwise show error in the login page
 		String path;
 		if (user == null) {
 			ServletContext servletContext = getServletContext();
@@ -87,7 +79,6 @@ public class CheckLogin extends HttpServlet {
 			path = getServletContext().getContextPath() + "/Home";
 			response.sendRedirect(path);
 		}
-
 	}
 
 	public void destroy() {

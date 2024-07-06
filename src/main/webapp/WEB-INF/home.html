@@ -4,7 +4,6 @@
 <head>
 	<meta charset="ISO-8859-1">
 	<title>Home</title>
-	<link rel="stylesheet" type="text/css" media="all" href="../CSS/mystyle.css" th:href="@{/css/mystyle.css}" />
 </head>
 
 <body>
@@ -12,8 +11,23 @@
 		<a th:href="@{/Logout}">Logout</a>
 	</div>
 	
-	<h1>Welcome!</h1>
-	<p th:text="${'Nice to see you again ' + session.user.name + ' ' + session.user.surname}"></p>
+	<h1 th:text="${'Welcome ' + session.user.name + ' ' + session.user.surname + '!'}"></h1>
+	
+	<h2>Created Groups</h2>
+	<p th:text="${#lists.size(createdGroups)} == 0 ? 'No created groups'"></p>
+	<ul th:remove="all-but-first">
+	  <li th:each="group : ${createdGroups}"><a th:href="@{/GroupDetails(groupId=${group.id})}" th:text="${group.title}">Coffe</a></li>
+	  <li><a>Tea</a></li>
+	  <li><a>Milk</a></li>
+	</ul>
+	
+	<h2>Invited Groups</h2>
+	<p th:text="${#lists.size(invitedGroups)} == 0 ? 'No invited groups'"></p>
+	<ul th:remove="all-but-first">
+	  <li th:each="group : ${invitedGroups}"><a th:href="@{/GroupDetails(groupId=${group.id})}" th:text="${group.title}">Coffe</a></li>
+	  <li><a>Tea</a></li>
+	  <li><a>Milk</a></li>
+	</ul>
 </body>
 
 </html>
