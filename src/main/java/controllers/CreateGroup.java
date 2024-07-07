@@ -73,7 +73,9 @@ public class CreateGroup extends HttpServlet {
 			return;
 		}
 		
+		User user = (User) session.getAttribute("user");
 		Group tempGroup = new Group();
+		tempGroup.setCreatorId(user.getId());
 		tempGroup.setTitle(title);
 		tempGroup.setDuration(duration);
 		tempGroup.setMinEntrants(minEntrants);

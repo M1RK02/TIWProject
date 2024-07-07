@@ -4,7 +4,6 @@ import java.sql.*;
 import java.util.*;
 
 import beans.Group;
-import beans.User;
 
 public class GroupDAO {
 	private Connection connection;
@@ -58,16 +57,40 @@ public class GroupDAO {
 		}
 	}
 
-	public void addGroup(int creatorId, String title, int duration, int minEntrants, int maxEntrants, List<User> entrants) throws SQLException {
-		String query = "INSERT INTO `Group` (CreatorId, Title, Duration, MinEntrants, MaxEntrants) VALUES (?, ?, ?, ?, ?)";
-		try (PreparedStatement pstatement = connection.prepareStatement(query)) {
-			pstatement.setInt(1, creatorId);
-			pstatement.setString(2, title);
-			pstatement.setInt(3, duration);
-			pstatement.setInt(4, minEntrants);
-			pstatement.setInt(5, maxEntrants);
-			pstatement.executeUpdate();
-		}
+	public void addGroup(Group group, List<Integer> entrantIds) throws SQLException {
+       try {
+            connection.setAutoCommit(false);
+            
+    		String query = "INSERT INTO `Group` (CreatorId, Title, Duration, MinEntrants, MaxEntrants) VALUES (?, ?, ?, ?, ?)";
+    		try (PreparedStatement pstatement = connection.prepareStatement(query)) {
+    			pstatement.setInt(1, group.getCreatorId());
+    			pstatement.setString(2, group.getTitle());
+    			pstatement.setInt(3, group.getDuration());
+    			pstatement.setInt(4, group.getMinEntrants());
+    			pstatement.setInt(5, group.getMaxEntrants());
+    			pstatement.executeUpdate();
+    		}
+    		
+    		query = "SET @group_id = LAST_INSERT_ID()";
+    		Statement statement = connection.createStatement();
+    		statement.executeUpdate(query);
+    		
+    		query = "INSERT INTO Entrant (GroupId, UserId) VALUES ";
+    		for(Integer userId : entrantIds) {
+    			query += "(@group_id, " + userId + "), ";
+    		}
+    		query = query.substring(0, query.length()-2);
+    		
+    		statement = connection.createStatement();
+    		statement.executeUpdate(query);
+
+            connection.commit();
+        } catch (SQLException e) {
+        	connection.rollback();
+        	throw new SQLException();
+        } finally {
+        	connection.setAutoCommit(true);
+        }
 	}
 	
 	private Group getGroupFromResult(ResultSet result) throws SQLException{

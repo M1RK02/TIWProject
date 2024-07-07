@@ -15,7 +15,7 @@
 	<form action="#" th:action="@{/CheckInvited}" method="POST">
 		<table th:remove="all-but-first">
 		  <tr th:each="user : ${users}">
-		    <td><input type="checkbox" name="checkedUserIds" value="${user.id}"></td>
+		    <td><input type="checkbox" name="checkedUserIds" th:value="${user.id}" th:checked="${checkedUsers != null && #lists.contains(checkedUsers, user.id)}"></td>
 		    <td th:text="${user.name} + ' ' + ${user.surname}">Maria Anders</td>
 		  </tr>
 		  <tr>
@@ -26,6 +26,8 @@
 		<br>
 		<input type="submit" value="Invite">
 	</form>
+	
+	<p th:text="${errorMsg}"></p>
 </body>
 
 </html>
