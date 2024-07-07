@@ -91,6 +91,7 @@ public class CreateGroup extends HttpServlet {
 			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Not possible to recover users");
 			return;
 		}
+		users.remove(user);
 		
 		// Send user to anagrafica
 		String path = "/WEB-INF/anagrafica.html";

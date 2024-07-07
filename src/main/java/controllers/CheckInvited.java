@@ -95,6 +95,8 @@ public class CheckInvited extends HttpServlet {
 				response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Not possible to recover users");
 				return;
 			}
+			User user = (User) session.getAttribute("user");
+			users.remove(user);
 			
 			String path = "/WEB-INF/anagrafica.html";
 			ServletContext servletContext = getServletContext();
