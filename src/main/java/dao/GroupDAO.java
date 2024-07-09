@@ -80,7 +80,6 @@ public class GroupDAO {
     			query += "(@group_id, " + userId + "), ";
     		}
     		query = query.substring(0, query.length()-2);
-    		
     		statement = connection.createStatement();
     		statement.executeUpdate(query);
 
