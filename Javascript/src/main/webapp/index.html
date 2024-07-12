@@ -1,15 +1,16 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-
+<html>
 <head>
 	<meta charset="ISO-8859-1">
 	<title>Login Page</title>
+	<script src="utils.js" charset="utf-8" defer></script>
+	<script src="credentialManager.js" charset="utf-8" defer></script>
 </head>
 
 <body>
 	<h1>Welcome to the work groups management application!</h1>
-
-	<form action="RegisterUser" method="POST">
+	
+	<form action="#">
 		<label>Sign Up</label>
 		<input type="text" name="username" placeholder="Username" required>
 		<input type="password" name="password" placeholder="Password" required>
@@ -17,18 +18,18 @@
 		<input type="email" name="email" placeholder="Email" required>
 		<input type="text" name="name" placeholder="Name" required>
 		<input type="text" name="surname" placeholder="Surname" required>
-		<input type="submit" value="Sign Up">
+		<input id="signUpButton" type="button" value="Sign Up">
 	</form>
 
-	<form action="CheckLogin" method="POST">
+	<form action="#">
 		<label>Login</label>
 		<input type="text" name="username" placeholder="Username" required>
 		<input type="password" name="password" placeholder="Password" required>
-		<input type="submit" value="Login">
+		<input id="loginButton" type="button" value="Login">
 	</form>
 	
-	<p th:text="${errorMsg}"></p>
-	<p th:text="${genericMsg}"></p>
+	<p id="errorMessage"></p>
+	<p id="genericMessage"></p>
 </body>
 
 </html>
