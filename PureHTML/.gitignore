@@ -11,6 +11,3 @@ src/main/webapp/WEB-INF/web.xml
 
 ### VS Code ###
 .vscode/
-
-### Mac OS ###
-.DS_Store
