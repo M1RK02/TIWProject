@@ -3,6 +3,7 @@ package controllers;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.servlet.ServletContext;
@@ -22,15 +23,14 @@ import utils.ConnectionHandler;
 import beans.User;
 import beans.Group;
 import dao.GroupDAO;
-import dao.UserDAO;
 
-@WebServlet("/GroupDetails")
-public class GroupDetails extends HttpServlet {
+@WebServlet("/Home")
+public class GoToHome extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 	private TemplateEngine templateEngine;
 	private Connection connection = null;
 
-	public GroupDetails() {
+	public GoToHome() {
 		super();
 	}
 
@@ -53,45 +53,25 @@ public class GroupDetails extends HttpServlet {
 			return;
 		}
 		
-		// get and check params
-		Integer groupId = null;
-		try {
-			groupId = Integer.parseInt(request.getParameter("groupId"));
-		} catch (NumberFormatException | NullPointerException e) {
-			response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Incorrect param values");
-			return;
-		}
-
+		// Find groups for the user
 		User user = (User) session.getAttribute("user");
-		UserDAO userDAO = new UserDAO(connection);
-		GroupDAO groupDAO = new GroupDAO(connection);
-		Group group = null;
-		User creator = null;
-		List<User> entrants = null;
+		GroupDAO groupDao = new GroupDAO(connection);
+		List<Group> createdGroups = new ArrayList<>();
+		List<Group> invitedGroups = new ArrayList<>();
 		try {
-			group = groupDAO.findGroupById(groupId);
-			if (group == null) {
-				response.sendError(HttpServletResponse.SC_NOT_FOUND, "Group not found");
-				return;
-			}
-			creator = userDAO.findUserById(group.getCreatorId());
-			entrants = userDAO.findEntrantsByGroupId(group.getId());
-			if (!user.equals(creator) && !entrants.contains(user)) {
-				response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "User not allowed");
-				return;
-			}
+			createdGroups = groupDao.findActiveGroupsByCreatorId(user.getId());
+			invitedGroups = groupDao.findActiveGroupsByEntrantId(user.getId());
 		} catch (SQLException e) {
-			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Not possible to recover group");
+			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Not possible to recover groups");
 			return;
 		}
 
-		// Redirect to the group details
-		String path = "/WEB-INF/details.html";
+		// Redirect to the home page and add groups to parameters
+		String path = "/WEB-INF/home.html";
 		ServletContext servletContext = getServletContext();
 		final WebContext ctx = new WebContext(request, response, servletContext, request.getLocale());
-		ctx.setVariable("group", group);
-		ctx.setVariable("creator", creator);
-		ctx.setVariable("entrants", entrants);
+		ctx.setVariable("createdGroups", createdGroups);
+		ctx.setVariable("invitedGroups", invitedGroups);
 		templateEngine.process(path, ctx, response.getWriter());
 	}
 
