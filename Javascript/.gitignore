@@ -1,0 +1,13 @@
+### Eclipse ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+build/
+src/main/webapp/WEB-INF/web.xml
+
+### VS Code ###
+.vscode/
