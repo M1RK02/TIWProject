@@ -4,10 +4,61 @@
 <head>
 	<meta charset="ISO-8859-1">
 	<title>Home</title>
+	<script src="utils.js" charset="utf-8" defer></script>
+	<script src="groupManagementNoIIFE.js" charset="utf-8" defer></script>
 </head>
 
 <body>
-	<h1>Ciao funziona!</h1>
+	<div align="right">
+		<a href="Logout">Logout</a>
+	</div>
+	
+	<h1>Welcome to the group management home page!</h1>
+	<p>Nice to see you again <span id="id_username"></span></p>
+	<div id="id_alert" class="alertmessage"></div>
+	
+		<table>
+		  <tr>
+		    <th>Created Groups</th>
+		    <th>Invited Groups</th>
+		    <th>Group Details</th>
+  		</tr>
+		<tr>
+			<td>
+				<ul id="id_createdgroups"></ul>
+			</td>
+			<td>
+				<ul id="id_invitedgroups"></ul>
+			</td>
+			<td>
+				<div id="id_details">
+					<h1 id="id_title"></h1>
+					<h3>Creator: <span id="id_creator"></span></h3>
+					<h3>Creation date: <span id="id_creationdate"></span></h3>
+					<h3>Duration: <span id="id_duration"></span></h3>
+					<h3>Minimum entrants: <span id="id_minEntrants"></span></h3>
+					<h3>Maximum entrants: <span id="id_maxEntrants"></span></h3>
+					
+					<h2>Entrants:</h2>
+					<ul id="id_entrants"></ul>
+				</div>
+			</td>
+		</tr>
+		<tr>
+			<td colspan="3" align="center">
+				<p>Complete the form to create a group</p>
+				<form id="id_creategroupform" action="#">
+					<fieldset>
+						<p>Title: <input type="text" name="title" required /></p>
+						<p>Duration: <input type="number" name="duration" min=1 required /></p>
+						<p>Minimum entrants: <input type="number" name="minEntrants" min=0 required /></p>
+						<p>Maximum entrants: <input type="number" name="maxEntrants" min=0 required /></p>
+						<input id="id_creategroupbutton" type="button" value="Create">
+					</fieldset>
+				</form>
+			</td>
+		</tr>
+	</table>
 </body>
 
 </html>
