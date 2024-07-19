@@ -16,7 +16,7 @@
 	<h2>Created Groups</h2>
 	<p th:text="${#lists.size(createdGroups)} == 0 ? 'No created groups'"></p>
 	<ul th:remove="all-but-first">
-		<li th:each="group : ${createdGroups}"><a th:href="@{/GroupDetails(groupId=${group.id})}"
+		<li th:each="group : ${createdGroups}"><a th:href="@{/GetGroupDetails(groupId=${group.id})}"
 				th:text="${group.title}">Coffe</a></li>
 		<li><a>Tea</a></li>
 		<li><a>Milk</a></li>
