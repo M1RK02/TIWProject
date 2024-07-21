@@ -4,8 +4,8 @@
 <head>
 	<meta charset="ISO-8859-1">
 	<title>Home</title>
-	<script src="utils.js" charset="utf-8" defer></script>
-	<script src="groupManagementNoIIFE.js" charset="utf-8" defer></script>
+	<script src="scripts/utils.js" charset="utf-8" defer></script>
+	<script src="scripts/groupManagementNoIIFE.js" charset="utf-8" defer></script>
 </head>
 
 <body>
@@ -64,7 +64,11 @@
 	 <div class="modal-content">
 	 	<span class="close">&times;</span> 
 		<h2>Select a User</h2>
-		<ul id="userList"></ul>
+		<form id="id_invited" action="#">
+			<table id="userList"></table>
+			<button id="id_checkinvitedbutton"></button>
+		</form>
+
     </div>
 	</div>
 	

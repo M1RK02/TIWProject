@@ -69,7 +69,7 @@ public class GetUserListData extends HttpServlet {
 		tempGroup.setMinEntrants(minEntrants);
 		tempGroup.setMaxEntrants(maxEntrants);
 		session.setAttribute("tempGroup", tempGroup);
-
+		session.setAttribute("attempts", 0);
 		
 		UserDAO userDAO = new UserDAO(connection);
 		List<User> users = null;
