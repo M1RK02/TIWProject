@@ -1,7 +1,7 @@
 { // avoid variables ending up in the global scope
 
 	// page components
-	let createdGroups, invitedGroups, groupDetails, createForm, userList
+	let createdGroups, invitedGroups, groupDetails, createForm, userList,
 	pageOrchestrator = new PageOrchestrator(); // main controller
 
 	window.addEventListener("load", () => {
@@ -23,9 +23,10 @@
 		}
 	}
 
-	function CreatedGroups(_alert, _listcontainer) {
+	function CreatedGroups(_alert, _listcontainer, _message) {
 		this.alert = _alert;
 		this.listcontainer = _listcontainer;
+		this.message = _message;
 
 		this.reset = function() {
 			this.listcontainer.style.visibility = "hidden";
@@ -40,7 +41,7 @@
 						if (req.status == 200) {
 							var groupsToShow = JSON.parse(req.responseText)[0];
 							if (groupsToShow.length == 0) {
-								alert("No created groups yet!");
+								self.message.textContent = "No created groups yet!";
 								return;
 							}
 							self.update(groupsToShow); // self visible by closure
@@ -60,6 +61,7 @@
 		this.update = function(arrayGroups) {
 			var li, anchor;
 			this.listcontainer.innerHTML = "";
+			this.message.innerHTML = "";
 			var self = this;
 			arrayGroups.forEach(function(group) {
 				li = document.createElement("li");
@@ -86,9 +88,10 @@
 		}
 	}
 
-	function InvitedGroups(_alert, _listcontainer) {
+	function InvitedGroups(_alert, _listcontainer, _message) {
 		this.alert = _alert;
 		this.listcontainer = _listcontainer;
+		this.message = _message;
 
 		this.reset = function() {
 			this.listcontainer.style.visibility = "hidden";
@@ -103,7 +106,7 @@
 						if (req.status == 200) {
 							var groupsToShow = JSON.parse(req.responseText)[1];
 							if (groupsToShow.length == 0) {
-								alert("No invited groups yet!");
+								self.message.textContent = "No invited groups yet!";
 								return;
 							}
 							self.update(groupsToShow); // self visible by closure
@@ -123,6 +126,7 @@
 		this.update = function(arrayGroups) {
 			var li, anchor;
 			this.listcontainer.innerHTML = "";
+			this.message.innerHTML = "";
 			var self = this;
 			arrayGroups.forEach(function(group) {
 				li = document.createElement("li");
@@ -152,6 +156,7 @@
 	function GroupDetails(options) {
 		this.alert = options['alert'];
 		this.detailcontainer = options['detailcontainer'];
+		this.detailheader = options['detailheader'];
 		this.title = options['title'];
 		this.creator = options['creator'];
 		this.date = options['date'];
@@ -171,6 +176,7 @@
 							var creator = JSON.parse(req.responseText)[1];
 							var entrants = JSON.parse(req.responseText)[2];
 							self.update(group, creator, entrants);
+							self.detailheader.style.visibility = "visible";
 							self.detailcontainer.style.visibility = "visible";
 						} else if (req.status == 403) {
 							window.location.href = req.getResponseHeader("Location");
@@ -186,6 +192,7 @@
 
 		this.reset = function() {
 			this.detailcontainer.style.visibility = "hidden";
+			this.detailheader.style.visibility = "hidden";
 		}
 
 		this.update = function(g, c, e) {
@@ -242,12 +249,14 @@
 
 	function UserList(options) {
 		this.modal = options['modal'];
+		this.overlay = options['overlay'];
 		this.userListContainer = options['userListContainer'];
 		this.alert = options['alert'];
 		this.button = options['button'];
 
 		this.show = function() {
-			this.modal.style.display = "block";
+			this.modal.classList.add('active')
+  			this.overlay.classList.add('active')
 			this.button.addEventListener('click', (e) => {
 				var form = e.target.closest("form");
 				if (form.checkValidity()) {
@@ -275,7 +284,8 @@
 		};
 
 		this.close = function() {
-			this.modal.style.display = "none";
+			this.modal.classList.remove('active')
+  			this.overlay.classList.remove('active')
 		};
 
 		this.update = function(users) {
@@ -300,33 +310,30 @@
 				self.userListContainer.appendChild(tr);
 			});
 		};
-
-		this.reset = function() {
-			this.modal.style.display = "none";
-		}
-
-
 	}
 
 	function PageOrchestrator() {
 		var alertContainer = document.getElementById("id_alert");
 
 		this.start = function() {
-			personalMessage = new PersonalMessage(sessionStorage.getItem('username'),
+			var personalMessage = new PersonalMessage(sessionStorage.getItem('username'), 
 				document.getElementById("id_username"));
 			personalMessage.show();
 
 			createdGroups = new CreatedGroups(
 				alertContainer,
-				document.getElementById("id_createdgroups"))
+				document.getElementById("id_createdgroups"),
+				document.getElementById("createdMessage"))
 
 			invitedGroups = new InvitedGroups(
 				alertContainer,
-				document.getElementById("id_invitedgroups"))
+				document.getElementById("id_invitedgroups"),
+				document.getElementById("invitedMessage"))
 
 			groupDetails = new GroupDetails({ // many parameters, wrap them in an object
 				alert: alertContainer,
 				detailcontainer: document.getElementById("id_details"),
+				detailheader: document.getElementById("details_header"),
 				title: document.getElementById("id_title"),
 				creator: document.getElementById("id_creator"),
 				date: document.getElementById("id_creationdate"),
@@ -350,23 +357,24 @@
 
 			userList = new UserList({
 				modal: document.getElementById("id_modalWindow"),
+				overlay: document.getElementById("overlay"),
 				userListContainer: document.getElementById("userList"),
 				alert: document.getElementById("id_alert"),
 				button: document.getElementById("id_checkinvitedbutton")
 			});
 
 
-			document.querySelector('.close').addEventListener('click', () => {
+			document.getElementById("id_modalclosebutton").addEventListener('click', () => {
 				userList.close();
 			});
 
 		}
 
-		this.refresh = function(currentMission) { // currentMission initially null at start
+		this.refresh = function(currentGroup) { // currentGroup initially null at start
 			alertContainer.textContent = "";        // not null after creation of status change
+			
 			createdGroups.reset();
 			invitedGroups.reset();
-			userList.reset();
 			groupDetails.reset();
 
 			createdGroups.show();
