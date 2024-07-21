@@ -1,7 +1,7 @@
 { // avoid variables ending up in the global scope
 
 	  // page components
-	  let createdGroups, invitedGroups, groupDetails, creationForm,
+	  let createdGroups, invitedGroups, groupDetails, createForm, userList
 	    pageOrchestrator = new PageOrchestrator(); // main controller
 
 	  window.addEventListener("load", () => {
@@ -202,6 +202,72 @@
 		    });
 	    }
 	  }
+	  
+	  function CreateForm(_button, _alert) {
+		this.button = _button;
+		this.alert = _alert;
+		
+		this.start = function() {
+			this.button.addEventListener('click', (e) => {
+				var form = e.target.closest("form");
+			    if (form.checkValidity()) {
+			      var self = this;
+			        makeCall("POST", 'GetUserListData', e.target.closest("form"), //correggere la makecall stile fraternali
+			        function(req) {
+			        if (req.readyState == 4) {
+			          if (req.status == 200) {
+			            var users = JSON.parse(req.responseText);
+			            userList.update(users);
+			            userList.show();
+			          } else if (req.status == 403) {
+			            window.location.href = req.getResponseHeader("Location");
+			            window.sessionStorage.removeItem('username');
+			          } else {
+			            self.alert.textContent = "errore";
+			          }
+			         }
+			        }
+			       );
+			    } else {
+			    	 form.reportValidity();
+			    }
+        	});
+        }
+	  }
+	  
+	  
+	  //devo fare la GetUserListData
+	  
+	  function UserList(options) {
+       this.modal = options['modal'];
+       this.userListContainer = options['userListContainer'];
+       this.alert = options['alert'];
+
+      this.show = function() {
+       this.modal.style.display = "block";
+       this.alert.textContent="OK";
+     };
+
+    this.close = function() {
+      this.modal.style.display = "none";
+    };
+
+    this.update = function(users) {
+      var self = this;
+      this.userListContainer.innerHTML = "";
+      users.forEach(function(user) {
+        var li = document.createElement("li");
+        li.textContent = `${user.name} ${user.surname}`;
+        self.userListContainer.appendChild(li);
+      });
+    };
+    
+    this.reset = function() {
+		this.modal.style.display = "none";
+	}
+    
+    
+  }
 
 	  function PageOrchestrator() {
 	    var alertContainer = document.getElementById("id_alert");
@@ -234,12 +300,34 @@
 	      document.querySelector("a[href='Logout']").addEventListener('click', () => {
 	        window.sessionStorage.removeItem('username');
 	      })
-      	}
+	      
 
-	    this.refresh = function(currentMission) { // currentMission initially null at start
-	      alertContainer.textContent = "";        // not null after creation of status change
+	      
+	      createForm = new CreateForm(
+			document.getElementById("id_creategroupbutton"),
+			alertContainer
+		  )
+		  createForm.start();
+		  
+		  	      userList = new UserList({
+          modal: document.getElementById("id_modalWindow"),
+          userListContainer: document.getElementById("userList"),
+          alert: document.getElementById("id_alert")
+         });
+	      
+      
+       document.querySelector('.close').addEventListener('click', () => {
+       userList.close();
+       });
+   		
+  	   }
+
+   this.refresh = function(currentMission) { // currentMission initially null at start
+   	      alertContainer.textContent = "";        // not null after creation of status change
 	      createdGroups.reset();
 	      invitedGroups.reset();
+	      userList.reset();
+	      groupDetails.reset();
 	      
 	      createdGroups.show();
 	      invitedGroups.show();
