@@ -245,7 +245,7 @@
 	}
 
 
-	//devo fare la GetUserListData
+	
 
 	function UserList(options) {
 		this.modal = options['modal'];
@@ -253,15 +253,21 @@
 		this.userListContainer = options['userListContainer'];
 		this.alert = options['alert'];
 		this.button = options['button'];
+		
+		
+		
+		
 
 		this.show = function() {
+			let msg="";
 			this.modal.classList.add('active')
   			this.overlay.classList.add('active')
-			this.button.addEventListener('click', (e) => {
+  			
+			/*this.button.addEventListener('click', (e) => {
 				var form = e.target.closest("form");
 				if (form.checkValidity()) {
-					var self = this;
-					makeCall("POST", 'CheckInvited', e.target.closest("form"), //correggere la makecall stile fraternali
+				  
+						makeCall("POST", 'CheckInvited', e.target.closest("form"), //correggere la makecall stile fraternali
 						function(req) {
 							if (req.readyState == 4) {
 								if (req.status == 200) {
@@ -277,10 +283,13 @@
 							}
 						}, false
 					);
-				} else {
+				  }
+				}
+				 else {
 					form.reportValidity();
 				}
 			});
+		};*/
 		};
 
 		this.close = function() {

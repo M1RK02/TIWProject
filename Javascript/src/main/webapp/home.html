@@ -7,6 +7,7 @@
 <link href="css/modal.css" rel="stylesheet">
 <script src="scripts/makeCall.js" charset="utf-8" defer></script>
 <script src="scripts/groupManagementNoIIFE.js" charset="utf-8" defer></script>
+<script src="scripts/groupCreation.js" charset="utf-8" defer></script>
 </head>
 
 <body>
@@ -71,10 +72,10 @@
 							Duration: <input type="number" name="duration" min="1" required />
 						</p>
 						<p>
-							Minimum entrants: <input type="number" name="minEntrants" min="0" required />
+							Minimum entrants: <input id="minEntrants" type="number" name="minEntrants" min="0" required />
 						</p>
 						<p>
-							Maximum entrants: <input type="number" name="maxEntrants" min="0" required />
+							Maximum entrants: <input id="maxEntrants" type="number" name="maxEntrants" min="0" required />
 						</p>
 						<input id="id_creategroupbutton" type="button" value="Create">
 					</fieldset>
@@ -93,6 +94,7 @@
 				<table id="userList"></table>
 				<button id="id_checkinvitedbutton">Invite!</button>
 			</form>
+			<div id="modalAlertMsg" class="alert alert-danger mx-auto" style="display: none">ERROR</div>
 		</div>
 	</div>
 	
