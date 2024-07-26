@@ -1,35 +1,38 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<meta charset="ISO-8859-1">
-	<title>Login Page</title>
-	<script src="scripts/makeCall.js" charset="utf-8" defer></script>
-	<script src="scripts/credentialManager.js" charset="utf-8" defer></script>
+    <meta charset="ISO-8859-1">
+    <title>Login Page</title>
+    <link rel="stylesheet" type="text/css" href="css/styles.css">
+    <script src="scripts/makeCall.js" charset="utf-8" defer></script>
+    <script src="scripts/credentialManager.js" charset="utf-8" defer></script>
 </head>
 
-<body>
-	<h1>Welcome to the work groups management application!</h1>
-	
-	<form action="#">
-		<label>Sign Up</label>
-		<input type="text" name="username" placeholder="Username" required>
-		<input type="password" name="password" placeholder="Password" required>
-		<input type="password" name="repeatPassword" placeholder="Repeat Password" required>
-		<input type="email" name="email" placeholder="Email" required>
-		<input type="text" name="name" placeholder="Name" required>
-		<input type="text" name="surname" placeholder="Surname" required>
-		<input id="signUpButton" type="button" value="Sign Up">
-	</form>
+<body class="login-page">
+    <h1>Welcome to the work groups management application!</h1>
 
-	<form action="#">
-		<label>Login</label>
-		<input type="text" name="username" placeholder="Username" required>
-		<input type="password" name="password" placeholder="Password" required>
-		<input id="loginButton" type="button" value="Login">
-	</form>
-	
-	<p id="errorMessage"></p>
-	<p id="genericMessage"></p>
+    <div id="forms-container">
+        <form action="#">
+            <label>Sign Up</label>
+            <input type="text" name="username" placeholder="Username" required>
+            <input type="password" name="password" placeholder="Password" required>
+            <input type="password" name="repeatPassword" placeholder="Repeat Password" required>
+            <input type="email" name="email" placeholder="Email" required>
+            <input type="text" name="name" placeholder="Name" required>
+            <input type="text" name="surname" placeholder="Surname" required>
+            <input id="signUpButton" type="button" value="Sign Up">
+        </form>
+
+        <form action="#">
+            <label>Login</label>
+            <input type="text" name="username" placeholder="Username" required>
+            <input type="password" name="password" placeholder="Password" required>
+            <input id="loginButton" type="button" value="Login">
+        </form>
+    </div>
+    
+    <p id="errorMessage"></p>
+    <p id="genericMessage"></p>
 </body>
 
 </html>
