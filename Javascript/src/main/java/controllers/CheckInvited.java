@@ -3,12 +3,12 @@ package controllers;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
+
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.MultipartConfig;
-
 
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -39,25 +39,41 @@ public class CheckInvited extends HttpServlet {
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		// Get and parse all parameters from request
 		HttpSession session = request.getSession();
-		List<Integer> invitedUserIds = null;
-		
-		boolean isBadRequest = false;
-		
-		try {
-			String[] checkedUserIds = request.getParameterValues("checkedUserIds");
-			invitedUserIds = Arrays.stream(checkedUserIds).map(id -> Integer.parseInt(id)).toList();
-		} catch (NumberFormatException | NullPointerException e) {
-			isBadRequest = true;
-		}
-		if (isBadRequest) {
-			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-			response.getWriter().println("Incorrect parameters");
-			return;
-		}
-		
-		//da inserire controllo che tempGroup non sia null
+
+		List<Integer> invitedUserIds = new ArrayList<>();
+
+	   boolean isBadRequest = false;
+
+	    try {
+	        String[] checkedUserIds = request.getParameterValues("checkedUserIds");
+	        if (checkedUserIds != null) {
+	            for (String id : checkedUserIds) {
+	                invitedUserIds.add(Integer.parseInt(id));
+	            }
+	            System.out.println("invitedUserIds: " + invitedUserIds);
+	        } else {
+	            System.out.println("checkedUserIds is null");
+	           isBadRequest = true;
+	        }
+	    } catch (NumberFormatException e) {
+	        System.out.println("NumberFormatException: " + e.getMessage()); //non prende questa ecc
+	       isBadRequest = true;
+	    }
+
+
+	   if (isBadRequest) {
+	       response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+	        response.getWriter().println("Incorrect parameters");
+	        return;
+	    }
+
 		
 		Group tempGroup = (Group) session.getAttribute("tempGroup");
+		if (tempGroup == null) {
+		    response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+		    response.getWriter().println("tempGroup is null");
+		    return;
+		}
 		String error = "";
 		
 		if (invitedUserIds.size() < tempGroup.getMinEntrants()) {
@@ -102,7 +118,7 @@ public class CheckInvited extends HttpServlet {
 			}
 			User user = (User) session.getAttribute("user");
 			users.remove(user);
-			//devo ripassarmi in json tutti i miei user?
+			//devo ripassare il json di tutti i miei user?
 			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
 			response.getWriter().write(error);	
 			return;
@@ -122,7 +138,11 @@ public class CheckInvited extends HttpServlet {
 		response.setStatus(HttpServletResponse.SC_OK);
 		response.setContentType("application/json");
 		response.setCharacterEncoding("UTF-8");
-		
+		response.getWriter().println("Group registered successfully");
+	}
+	
+	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		doPost(request, response);
 	}
 
 	public void destroy() {

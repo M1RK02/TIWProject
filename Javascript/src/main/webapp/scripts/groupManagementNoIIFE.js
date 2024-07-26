@@ -262,39 +262,17 @@
 			let msg="";
 			this.modal.classList.add('active')
   			this.overlay.classList.add('active')
-  			
-			/*this.button.addEventListener('click', (e) => {
-				var form = e.target.closest("form");
-				if (form.checkValidity()) {
-				  
-						makeCall("POST", 'CheckInvited', e.target.closest("form"), //correggere la makecall stile fraternali
-						function(req) {
-							if (req.readyState == 4) {
-								if (req.status == 200) {
-									self.alert.textContent = "Gruppo creato con successo";
-								} else if (req.status == 403) {
-									window.location.href = req.getResponseHeader("Location");
-									window.sessionStorage.removeItem('username');
-								} else if (req.status == 400) {
-									
-								} else {
-									self.alert.textContent = "errore";
-								}
-							}
-						}, false
-					);
-				  }
-				}
-				 else {
-					form.reportValidity();
-				}
-			});
-		};*/
+  			sessionStorage.setItem("invitation_attempts", "0");
+  		
 		};
 
 		this.close = function() {
 			this.modal.classList.remove('active')
   			this.overlay.classList.remove('active')
+  			document.getElementById("modalAlertMsg").style.display = "none";
+			document.getElementById("userList").innerHTML="";
+			sessionStorage.removeItem("invitation_attempts");
+			sessionStorage.removeAttribute("tempGroup"); //non sono sicura
 		};
 
 		this.update = function(users) {
@@ -306,9 +284,10 @@
 				var name = document.createElement("td");
 				
 				var input = document.createElement("input");
-				input.setAttribute("type", "checkbox");
-				input.setAttribute("value", user.id);
-				input.setAttribute("name", "checkedUserIds");
+       		    input.setAttribute("type", "checkbox");
+            	input.setAttribute("value", user.id.toString());
+            	input.setAttribute("name", "checkedUserIds");
+            	input.classList.add("form-check-input");
 				
 				check.appendChild(input);
 				name.textContent = user.name + ' ' + user.surname;

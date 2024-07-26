@@ -33,16 +33,16 @@ public class IncreaseAttempts extends HttpServlet {
 	protected void doPost (HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		HttpSession session = request.getSession();
 		
-		int temp = 0;
+		int tent = 0;
 		
 		if (session.getAttribute("attempts") == null)
-			session.setAttribute("attempts", temp);
+			session.setAttribute("attempts", tent);
 		else {
-			temp = (int) session.getAttribute("attempts");
-			temp = temp + 1;
+			tent = (int) session.getAttribute("attempts");
+			tent = tent + 1;
 		}
 		
-		if (temp >= 2) {
+		if (tent >= 2) {
 			session.removeAttribute("attempts");
 			session.removeAttribute("tempGroup");
 			
