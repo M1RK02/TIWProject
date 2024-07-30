@@ -7,9 +7,8 @@
 <link href="css/modal.css" rel="stylesheet">
 <link href="css/home.css" rel="stylesheet">
 
-<script src="scripts/makeCall.js" charset="utf-8" defer></script>
+<script src="scripts/utils.js" charset="utf-8" defer></script>
 <script src="scripts/groupManagementNoIIFE.js" charset="utf-8" defer></script>
-<script src="scripts/groupCreation.js" charset="utf-8" defer></script>
 </head>
 
 <body>
@@ -39,6 +38,9 @@
 				<p id="invitedMessage"></p>
 			</td>
 			<td id="id_details">
+				<div align="right">
+					<img id="id_bin" src=css/cestino.png width="100" height="100">
+				</div>
 				<h3>
 					Title: <span id="id_title"></span>
 				</h3>
@@ -74,14 +76,15 @@
 							Duration: <input type="number" name="duration" min="1" required />
 						</p>
 						<p>
-							Minimum entrants: <input id="minEntrants" type="number" name="minEntrants" min="0" required />
+							Minimum entrants: <input id="minEntrants" type="number"
+								name="minEntrants" min="0" required />
 						</p>
 						<p>
-							Maximum entrants: <input id="maxEntrants" type="number" name="maxEntrants" min="0" required />
+							Maximum entrants: <input id="maxEntrants" type="number"
+								name="maxEntrants" min="0" required />
 						</p>
 						<input id="id_creategroupbutton" type="button" value="Create">
 					</fieldset>
-					<div id="createNewGroupError" class="alert alert-danger" style="display: none">ERROR</div>
 				</form>
 			</td>
 		</tr>
@@ -97,12 +100,13 @@
 				<table id="userList"></table>
 				<button id="id_checkinvitedbutton">Invite!</button>
 			</form>
-			<div id="modalAlertMsg" class="alert alert-danger mx-auto" style="display: none">ERROR</div>
+			<div id="modalAlertMsg" class="alert alert-danger mx-auto"
+				style="display: none">ERROR</div>
 		</div>
 	</div>
-	
+
 	<div id="overlay"></div>
-	
+
 </body>
 
 </html>

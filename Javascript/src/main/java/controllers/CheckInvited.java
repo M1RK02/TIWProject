@@ -126,8 +126,9 @@ public class CheckInvited extends HttpServlet {
 		
 		// Add group
 		GroupDAO groupDAO = new GroupDAO(connection);
+		int idGroup;
 		try {
-			groupDAO.addGroup(tempGroup, invitedUserIds);
+			idGroup = groupDAO.addGroup(tempGroup, invitedUserIds);
 		} catch (SQLException e) {
 			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 			response.getWriter().println("Not possible to add group");
@@ -138,7 +139,7 @@ public class CheckInvited extends HttpServlet {
 		response.setStatus(HttpServletResponse.SC_OK);
 		response.setContentType("application/json");
 		response.setCharacterEncoding("UTF-8");
-		response.getWriter().println("Group registered successfully");
+		response.getWriter().print(idGroup);
 	}
 	
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {

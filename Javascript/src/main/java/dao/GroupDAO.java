@@ -57,18 +57,23 @@ public class GroupDAO {
 		}
 	}
 
-	public void addGroup(Group group, List<Integer> entrantIds) throws SQLException {
+	public int addGroup(Group group, List<Integer> entrantIds) throws SQLException {
        try {
             connection.setAutoCommit(false);
+            int id = 0;
             
     		String query = "INSERT INTO `Group` (CreatorId, Title, Duration, MinEntrants, MaxEntrants) VALUES (?, ?, ?, ?, ?)";
-    		try (PreparedStatement pstatement = connection.prepareStatement(query)) {
+    		try (PreparedStatement pstatement = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
     			pstatement.setInt(1, group.getCreatorId());
     			pstatement.setString(2, group.getTitle());
     			pstatement.setInt(3, group.getDuration());
     			pstatement.setInt(4, group.getMinEntrants());
     			pstatement.setInt(5, group.getMaxEntrants());
     			pstatement.executeUpdate();
+    			ResultSet rs = pstatement.getGeneratedKeys(); 
+                if (rs.next()) { 
+                    id = rs.getInt(1); 
+                }
     		}
     		
     		query = "SET @group_id = LAST_INSERT_ID()";
@@ -84,12 +89,22 @@ public class GroupDAO {
     		statement.executeUpdate(query);
 
             connection.commit();
+            return id;
         } catch (SQLException e) {
         	connection.rollback();
         	throw new SQLException();
         } finally {
         	connection.setAutoCommit(true);
         }
+	}
+	
+	public void removeEntrant(int groupId, int userId) throws SQLException{
+		String query= "DELETE FROM Entrant WHERE GroupId = ? AND UserId = ?";
+		try (PreparedStatement pstatement = connection.prepareStatement(query)) {
+			pstatement.setInt(1, groupId);
+			pstatement.setInt(2, userId);
+			pstatement.executeUpdate();
+		}
 	}
 	
 	private Group getGroupFromResult(ResultSet result) throws SQLException{
