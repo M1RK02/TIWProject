@@ -1,21 +1,20 @@
-{ // avoid variables ending up in the global scope
+{ // Avoid variables ending up in the global scope
 
-	// page components
+	// Page components
 	let createdGroups, invitedGroups, groupDetails, createForm, userList,
-		pageOrchestrator = new PageOrchestrator(); // main controller
+		pageOrchestrator = new PageOrchestrator(); // Main controller
 
 	window.addEventListener("load", () => {
 		if (sessionStorage.getItem("username") == null) {
 			window.location.href = "index.html";
 		} else {
-			pageOrchestrator.start(); // initialize the components
-			pageOrchestrator.refresh();
-		} // display initial content
+			pageOrchestrator.start(); // Initialize the components
+			pageOrchestrator.refresh(); // Display initial content
+		}
 	}, false);
 
 
-	// Constructors of view components
-
+	// Welcome message with username
 	function PersonalMessage(_username, messagecontainer) {
 		this.username = _username;
 		this.show = function() {
@@ -23,6 +22,7 @@
 		}
 	}
 
+	// List of user created groups
 	function CreatedGroups(_alert, _listcontainer, _message) {
 		this.alert = _alert;
 		this.listcontainer = _listcontainer;
@@ -34,24 +34,30 @@
 
 		this.show = function(next) {
 			var self = this;
-			makeCall("GET", "GetGroupsData", null,
-				function(req) {
-					if (req.readyState == 4) {
-						var message = req.responseText;
-						if (req.status == 200) {
-							var groupsToShow = JSON.parse(req.responseText)[0];
-							if (groupsToShow.length == 0) {
-								self.message.textContent = "No created groups yet!";
-								return;
-							}
-							self.update(groupsToShow); // self visible by closure
-							if (next) next(); // show the default element of the list if present
-						} else if (req.status == 403) {
-							window.location.href = req.getResponseHeader("Location");
-							window.sessionStorage.removeItem('username');
-						}
-						else {
-							self.alert.textContent = message;
+			makeCall("GET", 'GetGroupsData', null,
+				function(x) {
+					if (x.readyState == XMLHttpRequest.DONE) {
+						var message = x.responseText;
+						switch (x.status) {
+							case 200: // OK
+								var groupsToShow = JSON.parse(x.responseText)[0];
+								if (groupsToShow.length == 0) {
+									self.message.textContent = "No created groups yet!";
+									return;
+								}
+								self.update(groupsToShow);
+								if (next) next();
+								break;
+							case 400: // Bad request
+								self.alert.textContent = message;
+								break;
+							case 401: // Unauthorized
+								window.location.href = x.getResponseHeader("Location");
+								window.sessionStorage.removeItem('username');
+								break;
+							default: // Server error
+								self.alert.textContent = message;
+								break;
 						}
 					}
 				}
@@ -88,6 +94,7 @@
 		}
 	}
 
+	// List of user invited groups
 	function InvitedGroups(_alert, _listcontainer, _message) {
 		this.alert = _alert;
 		this.listcontainer = _listcontainer;
@@ -97,26 +104,31 @@
 			this.listcontainer.style.visibility = "hidden";
 		}
 
-		this.show = function(next) {
+		this.show = function() {
 			var self = this;
-			makeCall("GET", "GetGroupsData", null,
-				function(req) {
-					if (req.readyState == 4) {
-						var message = req.responseText;
-						if (req.status == 200) {
-							var groupsToShow = JSON.parse(req.responseText)[1];
-							if (groupsToShow.length == 0) {
-								self.message.textContent = "No invited groups yet!";
-								return;
-							}
-							self.update(groupsToShow); // self visible by closure
-							if (next) next(); // show the default element of the list if present
-						} else if (req.status == 403) {
-							window.location.href = req.getResponseHeader("Location");
-							window.sessionStorage.removeItem('username');
-						}
-						else {
-							self.alert.textContent = message;
+			makeCall("GET", 'GetGroupsData', null,
+				function(x) {
+					if (x.readyState == XMLHttpRequest.DONE) {
+						var message = x.responseText;
+						switch (x.status) {
+							case 200: // OK
+								var groupsToShow = JSON.parse(x.responseText)[1];
+								if (groupsToShow.length == 0) {
+									self.message.textContent = "No invited groups yet!";
+									return;
+								}
+								self.update(groupsToShow);
+								break;
+							case 400: // Bad request
+								self.alert.textContent = message;
+								break;
+							case 401: // Unauthorized
+								window.location.href = x.getResponseHeader("Location");
+								window.sessionStorage.removeItem('username');
+								break;
+							default: // Server error
+								self.alert.textContent = message;
+								break;
 						}
 					}
 				}
@@ -141,19 +153,10 @@
 				self.listcontainer.appendChild(li);
 			});
 			this.listcontainer.style.visibility = "visible";
-
-		}
-
-		this.autoclick = function(groupId) {
-			console.log("Autoclick " + groupId);
-			var e = new Event("click");
-			var selector = "a[groupid='" + groupId + "']";
-			var anchorToClick =
-				(groupId) ? document.querySelector(selector) : this.listcontainerbody.querySelectorAll("a")[0];
-			if (anchorToClick) anchorToClick.dispatchEvent(e);
 		}
 	}
 
+	// Section for group details
 	function GroupDetails(options) {
 		this.alert = options['alert'];
 		this.detailcontainer = options['detailcontainer'];
@@ -167,61 +170,96 @@
 		this.maxEntrants = options['maxEntrants'];
 		this.entrants = options['entrants'];
 
-		this.show = function(_groupid, _creator) {
+		this.show = function(_groupid, _isCreator) {
+			this.alert.textContent = "";
 			var self = this;
-			makeCall("GET", "GetGroupDetailsData?groupid=" + _groupid, null,
-				function(req) {
-					if (req.readyState == 4) {
-						var message = req.responseText;
-						if (req.status == 200) {
-							var group = JSON.parse(req.responseText)[0];
-							var creator = JSON.parse(req.responseText)[1];
-							var entrants = JSON.parse(req.responseText)[2];
-							self.update(group, creator, entrants);
-							self.detailheader.style.visibility = "visible";
-							self.detailcontainer.style.visibility = "visible";
-						} else if (req.status == 403) {
-							window.location.href = req.getResponseHeader("Location");
-							window.sessionStorage.removeItem('username');
-						}
-						else {
-							self.alert.textContent = message;
+			makeCall("GET", 'GetGroupDetailsData?groupid=' + _groupid, null,
+				function(x) {
+					if (x.readyState == XMLHttpRequest.DONE) {
+						var message = x.responseText;
+						switch (x.status) {
+							case 200: // OK
+								var group = JSON.parse(x.responseText)[0];
+								var creator = JSON.parse(x.responseText)[1];
+								var entrants = JSON.parse(x.responseText)[2];
+								self.update(group, creator, entrants, _isCreator);
+								self.detailheader.style.visibility = "visible";
+								self.detailcontainer.style.visibility = "visible";
+								break;
+							case 400: // Bad request
+								self.alert.textContent = message;
+								break;
+							case 401: // Unauthorized
+								window.location.href = x.getResponseHeader("Location");
+								window.sessionStorage.removeItem('username');
+								break;
+							default: // Server error
+								self.alert.textContent = message;
+								break;
 						}
 					}
 				}
 			);
-			if (_creator) {
-				self.bin.style.visibility = "visible";
-				self.bin.addEventListener('dragover', (e) => {
+
+			// Rimuovi gli event listener se già presenti
+			self.bin.removeEventListener('dragover', self.handleDragOver);
+			self.bin.removeEventListener('dragleave', self.handleDragLeave);
+			self.bin.removeEventListener('drop', self.handleDrop);
+
+			if (_isCreator) {
+				// Definisci le funzioni all'interno del blocco if
+				const handleDragOver = (e) => {
 					e.preventDefault();
-				}, false);
-				self.bin.addEventListener('drop', (e) => {
+					// Cambia l'immagine del cestino
+					self.bin.src = 'css/openedBin.png';
+				};
+
+				const handleDragLeave = () => {
+					// Ripristina l'immagine del cestino
+					self.bin.src = 'css/closedBin.png';
+				};
+
+				const handleDrop = (e) => {
 					e.preventDefault();
 					var userId = e.dataTransfer.getData("userId");
-					//da correggere la get con una post (è più carina)
 					makeCall("GET", "DeleteEntrant?groupId=" + _groupid + "&userId=" + userId, null,
 						function(x) {
 							if (x.readyState == XMLHttpRequest.DONE) {
 								var message = x.responseText;
 								switch (x.status) {
-									case 200: // all good
+									case 200: // OK
 										pageOrchestrator.refresh(x.responseText);
 										self.alert.textContent = 'Utente rimosso correttamente';
 										break;
-									case 400: // bad request
+									case 400: // Bad request
 										self.alert.textContent = 'Non rispetta i vincoli';
 										break;
-									case 401: // unauthorized
-										window.location.href = req.getResponseHeader("Location");
+									case 401: // Unauthorized
+										window.location.href = x.getResponseHeader("Location");
 										window.sessionStorage.removeItem('username');
 										break;
-									default: // server error
+									default: // Server error
 										self.alert.textContent = message;
 								}
 							}
 						}
 					);
-				}, false);
+					self.bin.src = 'css/closedBin.png';
+				};
+				
+				// Aggiungi gli event listener
+				self.bin.addEventListener('dragover', handleDragOver);
+				self.bin.addEventListener('dragleave', handleDragLeave);
+				self.bin.addEventListener('drop', handleDrop);
+
+				// Salva i riferimenti delle funzioni sugli oggetti per poterle rimuovere in futuro
+				self.handleDragOver = handleDragOver;
+				self.handleDragLeave = handleDragLeave;
+				self.handleDrop = handleDrop;
+
+				self.bin.style.visibility = "visible";
+			} else {
+				self.bin.style.visibility = "hidden";
 			}
 		};
 
@@ -231,50 +269,59 @@
 			this.bin.style.visibility = "hidden";
 		}
 
-		this.update = function(g, c, e) {
+		this.update = function(g, c, e, isCreator) {
 			this.title.textContent = g.title;
 			this.creator.textContent = c.name + ' ' + c.surname;
 			this.date.textContent = g.creationDate;
 			this.duration.textContent = g.duration;
 			this.minEntrants.textContent = g.minEntrants;
 			this.maxEntrants.textContent = g.maxEntrants;
-			var self = this;
 			this.entrants.innerHTML = "";
+			var self = this;
 			e.forEach(function(entrant) {
 				li = document.createElement("li");
 				li.textContent = entrant.name + ' ' + entrant.surname;
-				li.setAttribute('value', entrant.id);
-				li.setAttribute('draggable', true);
-				li.addEventListener('dragstart', (e) => {
-					e.dataTransfer.setData("userId", e.target.value);
-				}, false);
+				if (isCreator) {
+					li.setAttribute('value', entrant.id);
+					li.setAttribute('draggable', true);
+					li.addEventListener('dragstart', (e) => {
+						e.dataTransfer.setData("userId", e.target.value);
+					}, false);
+				}
 				self.entrants.appendChild(li);
 			});
 		}
 	}
 
+	// Form for group creation
 	function CreateForm(_button, _alert) {
 		this.button = _button;
 		this.alert = _alert;
 
-		this.start = function() {
+		this.reset = function() {
 			this.button.addEventListener('click', (e) => {
 				var form = e.target.closest("form");
 				if (form.checkValidity()) {
 					var self = this;
-					makeCall("POST", 'GetUserListData', e.target.closest("form"), //correggere la makecall stile fraternali
-						function(req) {
-							if (req.readyState == 4) {
-								if (req.status == 200) {
-									var users = JSON.parse(req.responseText);
-									userList.update(users);
-									userList.show();
-									localStorage.setItem("invitation_attempts", 0);
-								} else if (req.status == 403) {
-									window.location.href = req.getResponseHeader("Location");
-									window.sessionStorage.removeItem('username');
-								} else {
-									self.alert.textContent = "errore";
+					makeCall("POST", 'GetUserListData', e.target.closest("form"),
+						function(x) {
+							if (x.readyState == XMLHttpRequest.DONE) {
+								var message = x.responseText;
+								switch (x.status) {
+									case 200: // OK
+										var users = JSON.parse(x.responseText);
+										userList.update(users);
+										userList.show();
+										break;
+									case 400: // Bad request
+										self.alert.textContent = message;
+										break;
+									case 401: // Unauthorized
+										window.location.href = x.getResponseHeader("Location");
+										window.sessionStorage.removeItem('username');
+										break;
+									default: // Server error
+										self.alert.textContent = message;
 								}
 							}
 						}, false
@@ -286,9 +333,7 @@
 		}
 	}
 
-
-
-
+	// Modal window to invite entrants
 	function UserList(options) {
 		this.modal = options['modal'];
 		this.overlay = options['overlay'];
@@ -298,19 +343,20 @@
 		this.button = options['button'];
 
 		this.show = function() {
-			this.modal.classList.add('active')
-			this.overlay.classList.add('active')
+			sessionStorage.setItem("invitation_attempts", 0);
+			this.modal.classList.add('active');
+			this.overlay.classList.add('active');
+		};
 
-			// Event listener per il bottone di invito
-			this.button.addEventListener("click", (e) => {
+		this.reset = function() {
+			this.button.addEventListener('click', (e) => {
 				e.preventDefault();
-				var selectedUsersNumber = getSelectedUsersNumber(); // funziona
+				var selectedUsersNumber = getSelectedUsersNumber();
 
 				var form = document.getElementById("id_invited");
-				var formData = new FormData(form); //aggiunto solo per debuggare
+				var formData = new FormData(form);
 				var minEntrantsElement = document.getElementById('minEntrants');
 				var maxEntrantsElement = document.getElementById('maxEntrants');
-
 
 				var minEntrants = parseInt(minEntrantsElement.value, 10);
 				var maxEntrants = parseInt(maxEntrantsElement.value, 10);
@@ -318,46 +364,53 @@
 
 				var self = this;
 
-				var attempts = parseInt(localStorage.getItem("invitation_attempts")) + 1;
+				var attempts = parseInt(sessionStorage.getItem("invitation_attempts")) + 1;
+				console.log("Incrementing attempts to", attempts);
+				sessionStorage.setItem("invitation_attempts", attempts);
+				console.log("Current attempts after increment:", sessionStorage.getItem("invitation_attempts"));
 
 				document.querySelectorAll('input[name="checkedUserIds"]:checked').forEach((checkbox) => {
 					checkedUserIds.push(checkbox.value);
 				});
 
 				if (selectedUsersNumber < minEntrants) {
-					localStorage.setItem("invitation_attempts", attempts);
 					let neededParticipants = minEntrants - selectedUsersNumber;
 					showModalError("You must invite at least " + neededParticipants + " more participants. Attempts n." + attempts);
 				} else if (selectedUsersNumber > maxEntrants) {
-					localStorage.setItem("invitation_attempts", attempts);
 					let usersToRemove = selectedUsersNumber - maxEntrants;
 					showModalError("Too many users selected. Please, deselect at least " + usersToRemove + ". Attempts n." + attempts);
 				} else {
 					for (var pair of formData.entries()) {
-						console.log(pair[0] + ': ' + pair[1]); //aggiunto solo per debuggare
+						console.log(pair[0] + ': ' + pair[1]);
 					}
 
 					var invitedUserIds = checkedUserIds.map(id => parseInt(id, 10));
 
-					console.log("Invited User IDs:", invitedUserIds); //solo debug
-					makeCall("POST", "CheckInvited", form, function(req) {
-						if (req.readyState == 4) {
-							if (req.status == 200) {
-
-								closeModalWindow();
-								reset_modalWindow();
-								pageOrchestrator.refresh(req.responseText);
-								self.alert.textContent = "Gruppo creato con successo";
-							} else if (req.status == 403) {
-								window.location.href = req.getResponseHeader("Location");
-								window.sessionStorage.removeItem('username');
-							} else if (req.status == 400) {
-								self.alert.textContent = "Errore nella richiesta";
-							} else {
-								self.alert.textContent = "Errore";
+					console.log("Invited User IDs:", invitedUserIds);
+					makeCall("POST", 'CheckInvited', form,
+						function(x) {
+							if (x.readyState == XMLHttpRequest.DONE) {
+								var message = x.responseText;
+								switch (x.status) {
+									case 200: // OK
+										closeModalWindow();
+										reset_modalWindow();
+										pageOrchestrator.refresh(x.responseText);
+										self.alert.textContent = "Gruppo creato con successo";
+										break;
+									case 400: // Bad request
+										self.alert.textContent = "Errore nella richiesta";
+										break;
+									case 401: // Unauthorized
+										window.location.href = x.getResponseHeader("Location");
+										window.sessionStorage.removeItem('username');
+										break;
+									default: // Server error
+										self.alert.textContent = message;
+								}
 							}
 						}
-					}, true);
+					);
 					return;
 				}
 
@@ -365,18 +418,15 @@
 					self.alert.textContent = "Error: too many attempts to create a group with a wrong number of users.";
 					reset_modalWindow();
 					closeModalWindow();
-					//funzione per la refresh dei group 
-
 				}
 			});
 
 			this.closeButton.addEventListener('click', () => {
+				sessionStorage.setItem("invitation_attempts", 0);
 				reset_modalWindow();
 				closeModalWindow();
-				closeModalWindow();
 			});
-
-		};
+		}
 
 		this.update = function(users) {
 			var self = this;
@@ -403,6 +453,7 @@
 		};
 	}
 
+	// Main controller of the page
 	function PageOrchestrator() {
 		var alertContainer = document.getElementById("id_alert");
 
@@ -421,7 +472,7 @@
 				document.getElementById("id_invitedgroups"),
 				document.getElementById("invitedMessage"))
 
-			groupDetails = new GroupDetails({ // many parameters, wrap them in an object
+			groupDetails = new GroupDetails({ // Many parameters, wrap them in an object
 				alert: alertContainer,
 				detailcontainer: document.getElementById("id_details"),
 				detailheader: document.getElementById("details_header"),
@@ -435,17 +486,10 @@
 				entrants: document.getElementById("id_entrants")
 			});
 
-			document.querySelector("a[href='Logout']").addEventListener('click', () => {
-				window.sessionStorage.removeItem('username');
-			})
-
-
-
 			createForm = new CreateForm(
 				document.getElementById("id_creategroupbutton"),
 				alertContainer
 			)
-			createForm.start();
 
 			userList = new UserList({
 				modal: document.getElementById("id_modalWindow"),
@@ -455,10 +499,17 @@
 				alert: document.getElementById("id_alert"),
 				button: document.getElementById("id_checkinvitedbutton")
 			});
+
+			document.querySelector("a[href='Logout']").addEventListener('click', () => {
+				window.sessionStorage.removeItem('username');
+			})
+
+			createForm.reset();
+			userList.reset();
 		}
 
-		this.refresh = function(currentGroup) { // currentGroup initially null at start
-			alertContainer.textContent = "";        // not null after creation of status change
+		this.refresh = function(currentGroup) { // CurrentGroup initially null at start
+			alertContainer.textContent = "";
 
 			createdGroups.reset();
 			invitedGroups.reset();
