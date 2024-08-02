@@ -2,47 +2,52 @@
 <html xmlns:th="http://www.thymeleaf.org">
 
 <head>
-	<meta charset="ISO-8859-1">
-	<title>Home</title>
+    <meta charset="ISO-8859-1">
+    <title>Home</title>
+    <link rel="stylesheet" type="text/css" href="css/home.css">
 </head>
 
 <body>
-	<div align="right">
-		<a th:href="@{/Logout}">Logout</a>
-	</div>
+    <div class="logout-container">
+        <a th:href="@{/Logout}">Logout</a>
+    </div>
 
-	<h1 th:text="${'Welcome ' + session.user.name + ' ' + session.user.surname + '!'}"></h1>
+    <div class="welcome-section">
+        <h1 th:text="${'Welcome ' + session.user.name + ' ' + session.user.surname + '!'}"></h1>
+    </div>
 
-	<h2>Created Groups</h2>
-	<p th:text="${#lists.size(createdGroups)} == 0 ? 'No created groups'"></p>
-	<ul th:remove="all-but-first">
-		<li th:each="group : ${createdGroups}"><a th:href="@{/GetGroupDetails(groupId=${group.id})}"
-				th:text="${group.title}">Coffe</a></li>
-		<li><a>Tea</a></li>
-		<li><a>Milk</a></li>
-	</ul>
+    <div class="main-content">
+        <div class="groups-section">
+            <h2>Created Groups</h2>
+            <p th:text="${#lists.size(createdGroups)} == 0 ? 'No created groups'"></p>
+            <ul th:remove="all-but-first">
+                <li th:each="group : ${createdGroups}">
+                    <a th:href="@{/GetGroupDetails(groupId=${group.id})}" th:text="${group.title}">Coffe</a>
+                </li>
+            </ul>
 
-	<h2>Invited Groups</h2>
-	<p th:text="${#lists.size(invitedGroups)} == 0 ? 'No invited groups'"></p>
-	<ul th:remove="all-but-first">
-		<li th:each="group : ${invitedGroups}"><a th:href="@{/GetGroupDetails(groupId=${group.id})}"
-				th:text="${group.title}">Coffe</a></li>
-		<li><a>Tea</a></li>
-		<li><a>Milk</a></li>
-	</ul>
+            <h2>Invited Groups</h2>
+            <p th:text="${#lists.size(invitedGroups)} == 0 ? 'No invited groups'"></p>
+            <ul th:remove="all-but-first">
+                <li th:each="group : ${invitedGroups}">
+                    <a th:href="@{/GetGroupDetails(groupId=${group.id})}" th:text="${group.title}">Coffe</a>
+                </li>
+            </ul>
+        </div>
 
-	<div>
-		<p>Complete the form to create a group</p>
-		<form action="#" th:action="@{/CreateGroup}" method="POST">
-			<fieldset>
-				<p>Title: <input type="text" name="title" required /></p>
-				<p>Duration: <input type="number" name="duration" min=1 required /></p>
-				<p>Minimum entrants: <input type="number" name="minEntrants" min=0 required /></p>
-				<p>Maximum entrants: <input type="number" name="maxEntrants" min=0 required /></p>
-				<input type="submit" value="Create">
-			</fieldset>
-		</form>
-	</div>
+        <div class="create-group-container">
+            <h2>Complete the form to create a group</h2>
+            <form class="create-group-form" action="#" th:action="@{/CreateGroup}" method="POST">
+                <fieldset>
+                    <p>Title: <input type="text" name="title" required /></p>
+                    <p>Duration: <input type="number" name="duration" min="1" required /></p>
+                    <p>Minimum entrants: <input type="number" name="minEntrants" min="0" required /></p>
+                    <p>Maximum entrants: <input type="number" name="maxEntrants" min="0" required /></p>
+                    <input class="submit-button" type="submit" value="Create">
+                </fieldset>
+            </form>
+        </div>
+    </div>
 </body>
 
 </html>

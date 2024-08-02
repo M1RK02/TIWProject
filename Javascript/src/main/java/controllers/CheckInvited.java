@@ -18,9 +18,7 @@ import javax.servlet.http.HttpSession;
 
 import utils.ConnectionHandler;
 import beans.Group;
-import beans.User;
 import dao.GroupDAO;
-import dao.UserDAO;
 
 @WebServlet("/CheckInvited")
 @MultipartConfig
@@ -51,19 +49,22 @@ public class CheckInvited extends HttpServlet {
 	                invitedUserIds.add(Integer.parseInt(id));
 	            }
 	            System.out.println("invitedUserIds: " + invitedUserIds);
+
 	        } else {
 	            System.out.println("checkedUserIds is null");
-	           isBadRequest = true;
+	            isBadRequest = true;
 	        }
 	    } catch (NumberFormatException e) {
-	        System.out.println("NumberFormatException: " + e.getMessage()); //non prende questa ecc
+	    	System.out.println("number format exception e");
+	        System.out.println("NumberFormatException: " + e.getMessage()); 
 	       isBadRequest = true;
 	    }
+	    
 
 
 	   if (isBadRequest) {
 	       response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-	        response.getWriter().println("Incorrect parameters");
+	       response.getWriter().println("Incorrect parameters");
 	        return;
 	    }
 
@@ -105,20 +106,7 @@ public class CheckInvited extends HttpServlet {
 		
 		session.setAttribute("attempts", attempts+1);
 		
-		if (!error.isEmpty()) {
-			// Recall all users
-			UserDAO userDAO = new UserDAO(connection);
-			List<User> users = null;
-			try {
-				users = userDAO.findAllUsersOrderedBySurname();
-			} catch (SQLException e) {
-				response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-				response.getWriter().println("Not possible to recover users");
-				return;
-			}
-			User user = (User) session.getAttribute("user");
-			users.remove(user);
-			//devo ripassare il json di tutti i miei user?
+		if (!error.isEmpty()) {	
 			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
 			response.getWriter().write(error);	
 			return;
@@ -130,8 +118,9 @@ public class CheckInvited extends HttpServlet {
 		try {
 			idGroup = groupDAO.addGroup(tempGroup, invitedUserIds);
 		} catch (SQLException e) {
+			 System.out.println("non riesco ad aggiungere il gruppo");
 			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-			response.getWriter().println("Not possible to add group");
+			response.getWriter().println(" "+ e.getMessage());
 			return;
 		}
 		session.removeAttribute("attempts");

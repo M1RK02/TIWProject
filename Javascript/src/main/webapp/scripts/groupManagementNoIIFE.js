@@ -229,10 +229,10 @@
 								switch (x.status) {
 									case 200: // OK
 										pageOrchestrator.refresh(x.responseText);
-										self.alert.textContent = 'Utente rimosso correttamente';
+										self.alert.textContent = 'User removed successfully';
 										break;
 									case 400: // Bad request
-										self.alert.textContent = 'Non rispetta i vincoli';
+										self.alert.textContent = 'Removing the user would violate the minimum entrants constraint';
 										break;
 									case 401: // Unauthorized
 										window.location.href = x.getResponseHeader("Location");
@@ -509,11 +509,15 @@
 		}
 
 		this.refresh = function(currentGroup) { // CurrentGroup initially null at start
-			alertContainer.textContent = "";
+			
+			if (currentGroup == null) {
+				alertContainer.textContent = "";
+			}
 
 			createdGroups.reset();
 			invitedGroups.reset();
 			groupDetails.reset();
+			document.getElementById("id_creategroupform").reset();
 
 			createdGroups.show(function() {
 				createdGroups.autoclick(currentGroup);

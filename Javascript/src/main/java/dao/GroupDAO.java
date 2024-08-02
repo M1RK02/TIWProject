@@ -75,11 +75,12 @@ public class GroupDAO {
                     id = rs.getInt(1); 
                 }
     		}
-    		
+
     		query = "SET @group_id = LAST_INSERT_ID()";
     		Statement statement = connection.createStatement();
     		statement.executeUpdate(query);
     		
+    
     		query = "INSERT INTO Entrant (GroupId, UserId) VALUES ";
     		for(Integer userId : entrantIds) {
     			query += "(@group_id, " + userId + "), ";
@@ -91,8 +92,11 @@ public class GroupDAO {
             connection.commit();
             return id;
         } catch (SQLException e) {
+        	
         	connection.rollback();
-        	throw new SQLException();
+        	System.err.println("SQL Exception: " + e.getMessage());
+        	 throw e; 
+    
         } finally {
         	connection.setAutoCommit(true);
         }
