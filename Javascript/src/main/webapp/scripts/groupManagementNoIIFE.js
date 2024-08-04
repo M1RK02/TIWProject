@@ -171,7 +171,6 @@
 		this.entrants = options['entrants'];
 
 		this.show = function(_groupid, _isCreator) {
-			this.alert.textContent = "";
 			var self = this;
 			makeCall("GET", 'GetGroupDetailsData?groupid=' + _groupid, null,
 				function(x) {
@@ -229,10 +228,10 @@
 								switch (x.status) {
 									case 200: // OK
 										pageOrchestrator.refresh(x.responseText);
-										self.alert.textContent = 'User removed successfully';
+										self.alert.textContent = 'Participant removed successfully';
 										break;
 									case 400: // Bad request
-										self.alert.textContent = 'Removing the user would violate the minimum entrants constraint';
+										self.alert.textContent = 'Removing the participant would violate the minimum entrants constraint';
 										break;
 									case 401: // Unauthorized
 										window.location.href = x.getResponseHeader("Location");
@@ -396,10 +395,10 @@
 										closeModalWindow();
 										reset_modalWindow();
 										pageOrchestrator.refresh(x.responseText);
-										self.alert.textContent = "Gruppo creato con successo";
+										self.alert.textContent = "Group created successfully";
 										break;
 									case 400: // Bad request
-										self.alert.textContent = "Errore nella richiesta";
+										self.alert.textContent = "Request error";
 										break;
 									case 401: // Unauthorized
 										window.location.href = x.getResponseHeader("Location");
@@ -509,11 +508,8 @@
 		}
 
 		this.refresh = function(currentGroup) { // CurrentGroup initially null at start
-			
-			if (currentGroup == null) {
-				alertContainer.textContent = "";
-			}
-
+			alertContainer.textContent = "";
+						
 			createdGroups.reset();
 			invitedGroups.reset();
 			groupDetails.reset();
