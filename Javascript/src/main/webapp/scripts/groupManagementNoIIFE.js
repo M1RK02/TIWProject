@@ -379,9 +379,6 @@
 					let usersToRemove = selectedUsersNumber - maxEntrants;
 					showModalError("Too many users selected. Please, deselect at least " + usersToRemove + ". Attempts n." + attempts);
 				} else {
-					for (var pair of formData.entries()) {
-						console.log(pair[0] + ': ' + pair[1]);
-					}
 
 					var invitedUserIds = checkedUserIds.map(id => parseInt(id, 10));
 
@@ -463,8 +460,8 @@
 
 			createdGroups = new CreatedGroups(
 				alertContainer,
-				document.getElementById("id_createdgroups"),
-				document.getElementById("createdMessage"))
+				document.getElementById("id_createdgroups"), //list to fill
+				document.getElementById("createdMessage")) 
 
 			invitedGroups = new InvitedGroups(
 				alertContainer,
